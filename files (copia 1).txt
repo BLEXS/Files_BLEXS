@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==========================================
-# INSTALADOR GESTOR BLEXS V57.1 - FIX DELETE
+# INSTALADOR GESTOR BLEXS V57 - AIRDROP FIX
 # ==========================================
 
 if [ "$EUID" -ne 0 ]; then 
@@ -9,9 +9,9 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-echo -e "\033[1;34m[*] Instalando BLEXS V57.1 (Corrección Borrado)...\033[0m"
+echo -e "\033[1;34m[*] Instalando BLEXS V57 (Airdrop Estable)...\033[0m"
 
-# Dependencias
+# Dependencias (Aseguramos psmisc para fuser)
 PKGS="zip xclip python3-pip ntfs-3g exfat-fuse exfatprogs rsync parted gdisk rename qrencode git psmisc"
 for pkg in $PKGS; do
     if ! dpkg -s $pkg >/dev/null 2>&1; then apt-get install -y $pkg > /dev/null 2>&1; fi
@@ -28,7 +28,7 @@ RESET='\033[0m'; BOLD='\033[1m'; AZUL='\033[38;5;39m'; ROJO='\033[38;5;196m'
 VERDE='\033[38;5;46m'; AMARILLO='\033[38;5;226m'; BLANCO='\033[38;5;255m'
 GRIS='\033[38;5;244m'; ROSA='\033[38;5;200m'; CYAN='\033[38;5;51m'; PURPURA='\033[38;5;93m'
 
-# --- EMOJIS ---
+# --- EMOJIS (ORIGINALES) ---
 I_HOME="🏠"; I_BACK="↩️ "; I_EXIT="🚪"; I_DIR="📁"; I_DOC="📄"
 I_FLECHA="👉"; I_CHECK="✅"; I_USB="💾"; I_MEDIA="💿"; I_FIX="🔧"
 I_CLIP="📌"; I_PLUS_DIR="✨📂"; I_PLUS_FILE="✨📄"; I_COPY="📑"; I_MOVE="🚚"
@@ -52,8 +52,11 @@ compartir_web_qr_airdrop() {
     local ip; ip=$(hostname -I | awk '{print $1}')
     local port=8000
     if [ -z "$ip" ]; then echo -e "${ROJO}Sin red.${RESET}"; read; return; fi
+    
+    # 1. LIMPIEZA DE PUERTO (Vital para que no se cierre)
     fuser -k 8000/tcp >/dev/null 2>&1
     
+    # 2. GENERAR SCRIPT PYTHON (Sin indentación para evitar errores)
 cat << 'PY_EOF' > /tmp/blexs_airdrop.py
 import http.server, os, cgi, sys
 
@@ -125,12 +128,19 @@ PY_EOF
     echo -e "${PURPURA}🔗 SUBIR  :${RESET} http://$ip:$port/subir"
     echo -e "\n${BLANCO}👇 ESCANEA PARA CONECTAR:${RESET}\n"
     qrencode -t ANSIUTF8 "http://$ip:$port/subir"
+    
     echo -e "\n${ROJO}[!] Presiona CTRL+C para detener el servidor.${RESET}"
+    
+    # 3. EJECUCIÓN PROTEGIDA
     python3 /tmp/blexs_airdrop.py
+    
+    # Si falla, no cierra el menú de golpe
     if [ $? -ne 0 ]; then
         echo -e "\n${ROJO}❌ El servidor se cerró inesperadamente.${RESET}"
+        echo -e "Posible causa: Puerto 8000 ocupado o error de python."
         read -p "Enter para continuar..."
     fi
+    
     rm /tmp/blexs_airdrop.py
 }
 
@@ -176,7 +186,7 @@ mostrar_detalles_usb() {
 
 ejecutar_pegado_usb_777() {
     local dest="$(pwd)"; echo -e "${PURPURA}╔════════════════════════════════════════════╗${RESET}"
-    echo -e "${PURPURA}║${RESET} ${I_POWER} ${BOLD}PEGADO USB 777 (V57.1)${RESET}               ${PURPURA}║${RESET}"
+    echo -e "${PURPURA}║${RESET} ${I_POWER} ${BOLD}PEGADO USB 777 (V57)${RESET}                 ${PURPURA}║${RESET}"
     echo -e "${PURPURA}╚════════════════════════════════════════════╝${RESET}"
     if ! verificar_nombres_windows "$CLIP_USB_SRC"; then echo "Cancelado."; read; return; fi
     echo -ne "${CYAN}>>> Test Escritura... ${RESET}"; if touch "$dest/.t" 2>/dev/null; then echo "OK"; rm "$dest/.t"; else echo "FAIL"; read -p "Fix? [s/n]: " r; [[ "$r" == "s" ]] && reparar_y_redirigir && dest="$NEW_DESTINO" && cd "$dest" || return; fi
@@ -219,7 +229,7 @@ menu_archivo() {
 
 navegar() {
     while true; do clear; local r="$(pwd)"; echo -e "${AZUL}┌─────────────────────────────────────────────────────────────┐${RESET}"
-    echo -e "${AZUL}│${RESET} ${BOLD}👽 GESTOR BLEXS V57.1${RESET} :: ${GRIS}$REAL_USER${RESET}"
+    echo -e "${AZUL}│${RESET} ${BOLD}👽 GESTOR BLEXS V57${RESET} :: ${GRIS}$REAL_USER${RESET}"
     echo -e "${AZUL}│${RESET} ${AMARILLO}📍 $r${RESET}"
     [ -n "$CLIP_USB_SRC" ] && echo -e "${AZUL}│${RESET} ${VERDE}${I_POWER} USB COPY: $(basename "$CLIP_USB_SRC")${RESET}"
     echo -e "${AZUL}└─────────────────────────────────────────────────────────────┘${RESET}"
@@ -236,16 +246,11 @@ navegar() {
     local ls=(); if $VER_OCULTOS; then mapfile -t ls < <(ls -1a --group-directories-first | grep -v "^\.$\|^\.\.$"); else mapfile -t ls < <(ls -1 --group-directories-first); fi
     local i=10; if [ ${#ls[@]} -gt 0 ]; then for x in "${ls[@]}"; do if [ -d "$x" ]; then echo -e " ${AZUL}[$i]${RESET} $I_DIR $x${RESET}"; else echo -e " ${BLANCO}[$i]${RESET} $I_DOC $x${RESET}"; fi; ((i++)); done; else echo "Empty"; fi
     echo -ne "\n ${I_FLECHA} : "; read -r i
-    case $i in [xX]) exit ;; 0) cd .. ;; 1) cd "$ESCRITORIO" ;; 2) read -p "D: " n; mkdir -p "$n" ;; 3) read -p "F: " n; touch "$n" ;; [eE]) expulsar_usb_seguro ;; [uU]) menu_usb_tools ;; [cC]) CLIP_USB_SRC="$(pwd)"; CLIP_USB_TYPE="DIR"; echo "Loaded"; sleep 1 ;; [zZ]) zip -r "$(basename "$r").zip" . ;; [wW]) compartir_web_qr_airdrop ;; [gG]) actualizar_git ;; [pP]) if [ -n "$CLIP_USB_SRC" ]; then ejecutar_pegado_usb_777; elif [ -n "$CLIP_RUTA" ]; then [[ "$CLIP_MODO" == "COPIAR" ]] && cp -r "$CLIP_RUTA" . || mv "$CLIP_RUTA" .; CLIP_RUTA=""; fi ;; [kK]) CLIP_USB_SRC=""; ;; 6) CLIP_RUTA="$(pwd)"; CLIP_MODO="COPIAR" ;; 7) CLIP_RUTA="$(pwd)"; CLIP_MODO="MOVER" ;; 
-    9) 
-        echo -e "${ROJO}¿BORRAR CARPETA ACTUAL? [s/n]: ${RESET}"; read -r c
-        if [[ "$c" == "s" ]]; then cd ..; rm -rf "$r"; echo "Eliminado."; sleep 1; else echo "Cancelado."; sleep 1; fi 
-        ;; 
-    *) if [[ "$i" =~ ^[0-9]+$ ]] && [ "$i" -ge 10 ]; then local s="${ls[$((i-10))]}"; [ -d "$s" ] && cd "$s" || menu_archivo "$s"; fi ;; esac
+    case $i in [xX]) exit ;; 0) cd .. ;; 1) cd "$ESCRITORIO" ;; 2) read -p "D: " n; mkdir -p "$n" ;; 3) read -p "F: " n; touch "$n" ;; [eE]) expulsar_usb_seguro ;; [uU]) menu_usb_tools ;; [cC]) CLIP_USB_SRC="$(pwd)"; CLIP_USB_TYPE="DIR"; echo "Loaded"; sleep 1 ;; [zZ]) zip -r "$(basename "$r").zip" . ;; [wW]) compartir_web_qr_airdrop ;; [gG]) actualizar_git ;; [pP]) if [ -n "$CLIP_USB_SRC" ]; then ejecutar_pegado_usb_777; elif [ -n "$CLIP_RUTA" ]; then [[ "$CLIP_MODO" == "COPIAR" ]] && cp -r "$CLIP_RUTA" . || mv "$CLIP_RUTA" .; CLIP_RUTA=""; fi ;; [kK]) CLIP_USB_SRC=""; ;; 6) CLIP_RUTA="$(pwd)"; CLIP_MODO="COPIAR" ;; 7) CLIP_RUTA="$(pwd)"; CLIP_MODO="MOVER" ;; 9) read -p "Del? " c; [[ "$c" == "s" ]] && cd .. && rm -rf "$(basename "$r")" ;; *) if [[ "$i" =~ ^[0-9]+$ ]] && [ "$i" -ge 10 ]; then local s="${ls[$((i-10))]}"; [ -d "$s" ] && cd "$s" || menu_archivo "$s"; fi ;; esac
     done
 }
 navegar
 EOF_PAYLOAD
 
 chmod +x "$TARGET"
-echo -e "${VERDE}[OK] BLEXS V57.1 (BORRADO CORREGIDO).${NC}"
+echo -e "${VERDE}[OK] BLEXS V57 (AIRDROP STABLE) INSTALADO.${NC}"
