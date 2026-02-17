@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==========================================
-# INSTALADOR GESTOR BLEXS V57.1 - FIX DELETE
+# INSTALADOR GESTOR BLEXS V57.2 - GO RESTORED
 # ==========================================
 
 if [ "$EUID" -ne 0 ]; then 
@@ -9,7 +9,7 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-echo -e "\033[1;34m[*] Instalando BLEXS V57.1 (Corrección Borrado)...\033[0m"
+echo -e "\033[1;34m[*] Instalando BLEXS V57.2 (Comando GO Restaurado)...\033[0m"
 
 # Dependencias
 PKGS="zip xclip python3-pip ntfs-3g exfat-fuse exfatprogs rsync parted gdisk rename qrencode git psmisc"
@@ -219,7 +219,7 @@ menu_archivo() {
 
 navegar() {
     while true; do clear; local r="$(pwd)"; echo -e "${AZUL}┌─────────────────────────────────────────────────────────────┐${RESET}"
-    echo -e "${AZUL}│${RESET} ${BOLD}👽 GESTOR BLEXS V57.1${RESET} :: ${GRIS}$REAL_USER${RESET}"
+    echo -e "${AZUL}│${RESET} ${BOLD}👽 GESTOR BLEXS V57.2${RESET} :: ${GRIS}$REAL_USER${RESET}"
     echo -e "${AZUL}│${RESET} ${AMARILLO}📍 $r${RESET}"
     [ -n "$CLIP_USB_SRC" ] && echo -e "${AZUL}│${RESET} ${VERDE}${I_POWER} USB COPY: $(basename "$CLIP_USB_SRC")${RESET}"
     echo -e "${AZUL}└─────────────────────────────────────────────────────────────┘${RESET}"
@@ -248,4 +248,14 @@ navegar
 EOF_PAYLOAD
 
 chmod +x "$TARGET"
-echo -e "${VERDE}[OK] BLEXS V57.1 (BORRADO CORREGIDO).${NC}"
+
+# 4. RESTAURAR COMANDO 'go' GLOBAL
+if [ ! -f /usr/local/bin/go ] && [ ! -L /usr/local/bin/go ]; then
+    ln -s "$TARGET" /usr/local/bin/go
+    echo -e "${VERDE}[OK] BLEXS V57.2 INSTALADO. USA 'go' PARA ENTRAR.${NC}"
+else
+    # Si ya existe, lo forzamos para actualizarlo
+    rm -f /usr/local/bin/go
+    ln -s "$TARGET" /usr/local/bin/go
+    echo -e "${VERDE}[OK] COMANDO 'go' ACTUALIZADO.${NC}"
+fi
