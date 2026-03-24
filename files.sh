@@ -9,7 +9,7 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-echo -e "\033[38;5;46m[👽] Instalando BLEXS V57.6...\033[0m"
+echo -e "\033[38;5;46m[👽] Instalando BLEXS V57.7...\033[0m"
 
 PKGS="zip xclip python3-pip ntfs-3g exfat-fuse exfatprogs rsync parted gdisk rename qrencode git psmisc"
 for pkg in $PKGS; do
@@ -130,12 +130,68 @@ aplicar_tema() {
             NOMBRE_TEMA="🟠 NARANJA"
             ;;
         blanco)
-            COLOR1='\033[38;5;255m'  # blanco
-            COLOR2='\033[38;5;250m'  # gris claro
-            COLOR3='\033[38;5;244m'  # gris medio
-            COLOR4='\033[38;5;51m'   # cyan acento
-            COLOR5='\033[38;5;238m'  # gris oscuro
+            COLOR1='\033[38;5;255m'
+            COLOR2='\033[38;5;250m'
+            COLOR3='\033[38;5;244m'
+            COLOR4='\033[38;5;51m'
+            COLOR5='\033[38;5;238m'
             NOMBRE_TEMA="⬜ BLANCO"
+            ;;
+        hielo)
+            COLOR1='\033[38;5;195m'
+            COLOR2='\033[38;5;189m'
+            COLOR3='\033[38;5;153m'
+            COLOR4='\033[38;5;123m'
+            COLOR5='\033[38;5;117m'
+            NOMBRE_TEMA="🧊 HIELO"
+            ;;
+        fuego)
+            COLOR1='\033[38;5;202m'  # naranja fuego
+            COLOR2='\033[38;5;214m'  # naranja brillante
+            COLOR3='\033[38;5;130m'  # marrón naranja
+            COLOR4='\033[38;5;220m'  # amarillo cálido
+            COLOR5='\033[38;5;94m'   # marrón oscuro
+            NOMBRE_TEMA="🔥 FUEGO"
+            ;;
+        oceano)
+            COLOR1='\033[38;5;117m'  # azul agua claro
+            COLOR2='\033[38;5;74m'   # azul agua medio
+            COLOR3='\033[38;5;67m'   # azul profundo
+            COLOR4='\033[38;5;159m'  # celeste acento
+            COLOR5='\033[38;5;24m'   # azul marino oscuro
+            NOMBRE_TEMA="🌊 OCÉANO"
+            ;;
+        toxic)
+            COLOR1='\033[38;5;190m'  # verde lima
+            COLOR2='\033[38;5;184m'  # amarillo verdoso
+            COLOR3='\033[38;5;142m'  # oliva oscuro
+            COLOR4='\033[38;5;226m'  # amarillo neón
+            COLOR5='\033[38;5;100m'  # verde oliva muy oscuro
+            NOMBRE_TEMA="☢️  TOXIC"
+            ;;
+        neon)
+            COLOR1='\033[38;5;201m'  # magenta neón
+            COLOR2='\033[38;5;198m'  # rosa fuerte
+            COLOR3='\033[38;5;162m'  # rosa oscuro
+            COLOR4='\033[38;5;123m'  # celeste acento
+            COLOR5='\033[38;5;89m'   # magenta muy oscuro
+            NOMBRE_TEMA="💜 NEÓN"
+            ;;
+        sangre)
+            COLOR1='\033[38;5;160m'  # rojo sangre
+            COLOR2='\033[38;5;124m'  # rojo oscuro
+            COLOR3='\033[38;5;88m'   # rojo muy oscuro
+            COLOR4='\033[38;5;203m'  # salmón acento
+            COLOR5='\033[38;5;52m'   # granate
+            NOMBRE_TEMA="🩸 SANGRE"
+            ;;
+        galaxia)
+            COLOR1='\033[38;5;183m'  # violeta claro
+            COLOR2='\033[38;5;141m'  # violeta medio
+            COLOR3='\033[38;5;97m'   # violeta oscuro
+            COLOR4='\033[38;5;219m'  # rosa lila acento
+            COLOR5='\033[38;5;54m'   # índigo oscuro
+            NOMBRE_TEMA="🌌 GALAXIA"
             ;;
         *)
             aplicar_tema "matrix"; return ;;
@@ -165,6 +221,13 @@ menu_temas() {
         echo -e "  \033[38;5;213m[7]${RESET}  🩷 ROSA      ${GRIS}── vibrante y llamativo${RESET}"
         echo -e "  \033[38;5;214m[8]${RESET}  🟠 NARANJA   ${GRIS}── energía y fuego${RESET}"
         echo -e "  \033[38;5;255m[9]${RESET}  ⬜ BLANCO    ${GRIS}── limpio y minimalista${RESET}"
+        echo -e "  \033[38;5;195m[10]${RESET} 🧊 HIELO     ${GRIS}── azul polar helado${RESET}"
+        echo -e "  \033[38;5;202m[11]${RESET} 🔥 FUEGO     ${GRIS}── rojo naranja ardiente${RESET}"
+        echo -e "  \033[38;5;201m[12]${RESET} 💜 NEÓN      ${GRIS}── rosa neón oscuro${RESET}"
+        echo -e "  \033[38;5;45m[13]${RESET}  🌊 OCÉANO    ${GRIS}── azul profundo marino${RESET}"
+        echo -e "  \033[38;5;124m[14]${RESET} 🩸 SANGRE    ${GRIS}── rojo oscuro intenso${RESET}"
+        echo -e "  \033[38;5;183m[15]${RESET} 🌌 GALAXIA   ${GRIS}── violeta espacial${RESET}"
+        echo -e "  \033[38;5;154m[16]${RESET} ☢️  TOXIC     ${GRIS}── verde radioactivo${RESET}"
         echo ""
         echo -e "  ${GRIS}[0]${RESET}  ${I_BACK} Volver"
         echo -ne "\n  ${I_ALIEN} : "; read -r op
@@ -179,6 +242,13 @@ menu_temas() {
             7) nuevo_tema="rosa" ;;
             8) nuevo_tema="naranja" ;;
             9) nuevo_tema="blanco" ;;
+            10) nuevo_tema="hielo" ;;
+            11) nuevo_tema="fuego" ;;
+            12) nuevo_tema="neon" ;;
+            13) nuevo_tema="oceano" ;;
+            14) nuevo_tema="sangre" ;;
+            15) nuevo_tema="galaxia" ;;
+            16) nuevo_tema="toxic" ;;
             0) return ;;
         esac
         if [ -n "$nuevo_tema" ]; then
@@ -191,13 +261,134 @@ menu_temas() {
     done
 }
 
+# --- ESTADÍSTICAS DE CARPETA ---
+estadisticas_carpeta() {
+    clear
+    local r="$(pwd)"
+    sep_top
+    echo -e "${COLOR3}║${RESET}  📊 ${BOLD}${COLOR1}ESTADÍSTICAS DE CARPETA${RESET}${COLOR3}                                      ║${RESET}"
+    sep_bot
+    echo -e "  ${COLOR4}📍 Ruta:${RESET}       ${GRIS2}$r${RESET}"
+    echo ""
+    local total_peso=$(du -sh . 2>/dev/null | awk '{print $1}')
+    local total_archivos=$(find . -maxdepth 1 -type f | wc -l)
+    local total_dirs=$(find . -maxdepth 1 -type d | grep -v "^\.$" | wc -l)
+    local total_ocultos=$(find . -maxdepth 1 -name ".*" ! -name "." | wc -l)
+    local total_scripts=$(find . -maxdepth 1 -type f \( -name "*.sh" -o -name "*.py" -o -name "*.pl" -o -name "*.rb" \) | wc -l)
+    local ejecutables=$(find . -maxdepth 1 -type f -perm /111 | wc -l)
+    local archivo_grande=$(find . -maxdepth 1 -type f -printf '%s %f\n' 2>/dev/null | sort -rn | head -1)
+    local archivo_reciente=$(find . -maxdepth 1 -type f -printf '%T@ %f\n' 2>/dev/null | sort -rn | head -1 | awk '{print $2}')
+    local disco_libre=$(df -h "$r" 2>/dev/null | awk 'NR==2{print $4}')
+    local disco_total=$(df -h "$r" 2>/dev/null | awk 'NR==2{print $2}')
+    local disco_uso=$(df -h "$r" 2>/dev/null | awk 'NR==2{print $5}')
+
+    echo -e "  ${COLOR1}💾 Peso total     :${RESET} ${BOLD}${AMARILLO}$total_peso${RESET}"
+    echo -e "  ${COLOR1}📄 Archivos       :${RESET} ${COLOR4}$total_archivos${RESET}"
+    echo -e "  ${COLOR1}📂 Subcarpetas    :${RESET} ${COLOR4}$total_dirs${RESET}"
+    echo -e "  ${COLOR1}👁️  Ocultos        :${RESET} ${GRIS2}$total_ocultos${RESET}"
+    echo -e "  ${COLOR1}⚡ Scripts        :${RESET} ${COLOR2}$total_scripts ${GRIS}(.sh .py .pl .rb)${RESET}"
+    echo -e "  ${COLOR1}🔓 Ejecutables    :${RESET} ${COLOR2}$ejecutables${RESET}"
+    if [ -n "$archivo_grande" ]; then
+        local ag_size=$(echo "$archivo_grande" | awk '{print $1}' | numfmt --to=iec 2>/dev/null || echo "$archivo_grande" | awk '{print $1}')
+        local ag_name=$(echo "$archivo_grande" | awk '{print $2}')
+        echo -e "  ${COLOR1}🏋️  Más pesado     :${RESET} ${NARANJA}$ag_name${RESET} ${GRIS}($ag_size bytes)${RESET}"
+    fi
+    [ -n "$archivo_reciente" ] && echo -e "  ${COLOR1}🕐 Más reciente   :${RESET} ${COLOR2}$archivo_reciente${RESET}"
+    echo ""
+    sep_linea
+    echo -e "  ${COLOR4}💿 Disco libre    :${RESET} ${BOLD}${COLOR1}$disco_libre${RESET}${GRIS} / $disco_total${RESET}   ${GRIS}(uso: $disco_uso)${RESET}"
+    sep_linea
+    echo -ne "\n  ${I_ALIEN} Enter para volver..."; read
+}
+
+VISTA_FILE="$HOME_DIR/.blexs_vista"
+MODO_VISTA="normal"
+[ -f "$VISTA_FILE" ] && MODO_VISTA=$(cat "$VISTA_FILE")
+
+# --- TOGGLE VISTA ---
+toggle_vista() {
+    if [ "$MODO_VISTA" == "arbol" ]; then
+        MODO_VISTA="normal"; echo "normal" > "$VISTA_FILE"
+        echo -e "  ${COLOR1}${I_CHECK} Vista: NORMAL${RESET}"; sleep 1
+    else
+        MODO_VISTA="arbol"; echo "arbol" > "$VISTA_FILE"
+        echo -e "  ${COLOR1}${I_CHECK} Vista: ÁRBOL${RESET}"; sleep 1
+    fi
+}
+
+# --- MODO ÁRBOL INTERACTIVO ---
+ARBOL_MAPA=()  # indice global -> ruta completa
+
+_arbol_build() {
+    local dir="${1:-.}"
+    local prefix="${2:-}"
+    local nivel="${3:-0}"
+    local max_nivel=3
+    [ "$nivel" -ge "$max_nivel" ] && return
+    local entries=()
+    if $VER_OCULTOS; then
+        mapfile -t entries < <(ls -1a --group-directories-first "$dir" 2>/dev/null | grep -v "^\.$\|^\.\.$")
+    else
+        mapfile -t entries < <(ls -1 --group-directories-first "$dir" 2>/dev/null)
+    fi
+    local total=${#entries[@]}
+    local idx=0
+    for entry in "${entries[@]}"; do
+        ((idx++))
+        local full="$dir/$entry"
+        local conector="├──"
+        local nuevo_prefix="${prefix}│   "
+        [ "$idx" -eq "$total" ] && conector="└──" && nuevo_prefix="${prefix}    "
+        local num=${#ARBOL_MAPA[@]}
+        ARBOL_MAPA+=("$full")
+        if [ -d "$full" ]; then
+            echo -e "${COLOR3}║${RESET} ${GRIS}${prefix}${conector}${RESET} ${COLOR4}[${num}]${RESET} ${I_DIR} ${BOLD}${COLOR1}${entry}${RESET}"
+            _arbol_build "$full" "$nuevo_prefix" "$((nivel+1))"
+        else
+            echo -e "${COLOR3}║${RESET} ${GRIS}${prefix}${conector}${RESET} ${COLOR2}[${num}]${RESET} ${I_DOC} ${GRIS2}${entry}${RESET}"
+        fi
+    done
+}
+
+mostrar_arbol() {
+    ARBOL_MAPA=()
+    _arbol_build "." "" 0
+}
+
+navegar_arbol() {
+    local sel="$1"
+    if [[ "$sel" =~ ^[0-9]+$ ]] && [ "$sel" -lt "${#ARBOL_MAPA[@]}" ]; then
+        local target="${ARBOL_MAPA[$sel]}"
+        # normalizar ruta: quitar el ./
+        target="${target#./}"
+        local full_path="$(pwd)/$target"
+        if [ -d "$full_path" ]; then
+            cd "$full_path"
+            return 0
+        elif [ -f "$full_path" ]; then
+            menu_archivo "$full_path"
+            return 0
+        fi
+    fi
+    return 1
+}
+
 # --- INFO PANEL ---
 info_panel() {
-    local disco_libre=$(df -h "$(pwd)" 2>/dev/null | awk 'NR==2{print $4}')
-    local disco_total=$(df -h "$(pwd)" 2>/dev/null | awk 'NR==2{print $2}')
-    local num_archivos=$(ls -1 "$(pwd)" 2>/dev/null | wc -l)
+    local r="$(pwd)"
+    local num_archivos=$(ls -1 "$r" 2>/dev/null | wc -l)
     local fecha=$(date "+%d/%m/%Y %H:%M")
-    echo -e "${COLOR3}║${RESET}  ${I_DISCO} ${GRIS2}Libre:${RESET} ${BOLD}${COLOR1}$disco_libre${RESET}${GRIS}/$disco_total${RESET}   ${I_ITEMS} ${GRIS2}Items:${RESET} ${BOLD}${COLOR4}$num_archivos${RESET}   ${I_RELOJ} ${GRIS}$fecha${RESET}"
+    local vista_label=""
+    [ "$MODO_VISTA" == "arbol" ] && vista_label=" ${GRIS}│ 🌳 ÁRBOL${RESET}"
+
+    if [ "$r" == "$ESCRITORIO" ] || [ "$r" == "$HOME_DIR" ]; then
+        local disco_libre=$(df -h "$r" 2>/dev/null | awk 'NR==2{print $4}')
+        local disco_total=$(df -h "$r" 2>/dev/null | awk 'NR==2{print $2}')
+        echo -e "${COLOR3}║${RESET}  ${I_DISCO} ${GRIS2}Disco libre:${RESET} ${BOLD}${COLOR1}$disco_libre${RESET}${GRIS}/$disco_total${RESET}   ${I_ITEMS} ${GRIS2}Items:${RESET} ${BOLD}${COLOR4}$num_archivos${RESET}   ${I_RELOJ} ${GRIS}$fecha${RESET}${vista_label}"
+    else
+        local carpeta_peso=$(du -sh "$r" 2>/dev/null | awk '{print $1}')
+        echo -e "${COLOR3}║${RESET}  📂 ${GRIS2}Carpeta:${RESET} ${BOLD}${COLOR1}$carpeta_peso${RESET}   ${I_ITEMS} ${GRIS2}Items:${RESET} ${BOLD}${COLOR4}$num_archivos${RESET}   ${I_RELOJ} ${GRIS}$fecha${RESET}${vista_label}"
+    fi
 }
 
 # --- BUSCADOR ---
@@ -627,7 +818,7 @@ navegar() {
         clear
         local r="$(pwd)"
         echo -e "${COLOR3}╔══════════════════════════════════════════════════════════════╗${RESET}"
-        echo -e "${COLOR3}║${RESET}  ${I_ALIEN} ${BOLD}${COLOR1}GESTOR BLEXS${RESET} ${GRIS}V57.6${RESET}  ${GRIS}::${RESET}  ${I_USER} ${BOLD}${COLOR4}$REAL_USER${RESET}  ${GRIS}│${RESET} ${I_TEMA} ${COLOR2}${NOMBRE_TEMA}${RESET}"
+        echo -e "${COLOR3}║${RESET}  ${I_ALIEN} ${BOLD}${COLOR1}GESTOR BLEXS${RESET} ${GRIS}V57.7${RESET}  ${GRIS}::${RESET}  ${I_USER} ${BOLD}${COLOR4}$REAL_USER${RESET}  ${GRIS}│${RESET} ${I_TEMA} ${COLOR2}${NOMBRE_TEMA}${RESET}"
         echo -e "${COLOR3}║${RESET}  ${I_RUTA} ${GRIS2}$r${RESET}"
         info_panel
         [ -n "$CLIP_USB_SRC" ] && echo -e "${COLOR3}║${RESET}  ${I_POWER} ${BOLD}${COLOR1}USB:${RESET} ${AMARILLO}$(basename "$CLIP_USB_SRC")${RESET}"
@@ -636,7 +827,8 @@ navegar() {
         echo -e "${COLOR3}║${RESET}  ${COLOR1}[2]${RESET} ${I_PLUS_DIR} Crear Dir  ${COLOR2}[3]${RESET} ${I_PLUS_FILE} Crear File  ${AMARILLO}[U]${RESET} ${I_USB} USB Tools"
         echo -e "${COLOR3}║${RESET}  ${COLOR4}[6]${RESET} ${I_COPY} Copiar Dir  ${COLOR4}[7]${RESET} ${I_MOVE} Mover Dir  ${ROJO}[9]${RESET} ${I_TRASH} Borrar"
         echo -e "${COLOR3}║${RESET}  ${COLOR2}[E]${RESET} ${I_EJECT} Expulsar   ${COLOR1}[W]${RESET} ${I_WEB} Airdrop   ${AMARILLO}[/]${RESET} ${I_SEARCH} Buscar"
-        echo -e "${COLOR3}║${RESET}  ${COLOR1}[T]${RESET} ${I_TEMA} ${BOLD}Temas${RESET}       ${COLOR4}[R]${RESET} 📎 Copiar ruta actual"
+        echo -e "${COLOR3}║${RESET}  ${COLOR1}[T]${RESET} ${I_TEMA} ${BOLD}Temas${RESET}       ${COLOR4}[R]${RESET} 📎 Copiar ruta   ${COLOR2}[I]${RESET} 📊 Stats"
+        echo -e "${COLOR3}║${RESET}  ${COLOR1}[O]${RESET} 🖥️  Terminal aquí  ${COLOR4}[B]${RESET} 📁 Abrir en Thunar  ${COLOR1}[V]${RESET} 🌳 Vista"
         [ -d .git ] && echo -e "${COLOR3}║${RESET}  ${GRIS}[G]${RESET} ${I_GIT} Git Update"
         echo -e "${COLOR3}╠══════════════════════════════════════════════════════════════╣${RESET}"
         echo -e "${COLOR3}║${RESET}  ${NARANJA}[C]${RESET} ${I_POWER} ${BOLD}Copiar carpeta → USB${RESET}   ${AMARILLO}[Z]${RESET} ${I_ZIP} Zip   ${COLOR1}[S]${RESET} ${I_MULTI} Selección"
@@ -652,20 +844,29 @@ navegar() {
         else
             mapfile -t ls_arr < <(ls -1 --group-directories-first)
         fi
-        local i=10
-        if [ ${#ls_arr[@]} -gt 0 ]; then
-            for x in "${ls_arr[@]}"; do
-                if [ -d "$x" ]; then
-                    echo -e "${COLOR3}║${RESET}  ${COLOR4}[$i]${RESET} ${I_DIR} ${BOLD}${COLOR1}$x${RESET}"
-                else
-                    echo -e "${COLOR3}║${RESET}  ${COLOR2}[$i]${RESET} ${I_DOC} ${GRIS2}$x${RESET}"
-                fi
-                ((i++))
-            done
+        if [ "$MODO_VISTA" == "arbol" ]; then
+            if [ ${#ls_arr[@]} -gt 0 ]; then
+                mostrar_arbol "."
+            else
+                echo -e "${COLOR3}║${RESET}  ${GRIS}  ~ vacío ~${RESET}"
+            fi
         else
-            echo -e "${COLOR3}║${RESET}  ${GRIS}  ~ vacío ~${RESET}"
+            local i=10
+            if [ ${#ls_arr[@]} -gt 0 ]; then
+                for x in "${ls_arr[@]}"; do
+                    if [ -d "$x" ]; then
+                        echo -e "${COLOR3}║${RESET}  ${COLOR4}[$i]${RESET} ${I_DIR} ${BOLD}${COLOR1}$x${RESET}"
+                    else
+                        echo -e "${COLOR3}║${RESET}  ${COLOR2}[$i]${RESET} ${I_DOC} ${GRIS2}$x${RESET}"
+                    fi
+                    ((i++))
+                done
+            else
+                echo -e "${COLOR3}║${RESET}  ${GRIS}  ~ vacío ~${RESET}"
+            fi
         fi
         echo -e "${COLOR3}╚══════════════════════════════════════════════════════════════╝${RESET}"
+        [ "$MODO_VISTA" == "arbol" ] && echo -e "  ${GRIS}🌳 Árbol activo — escribe ${COLOR4}[#]${GRIS} para navegar directo · ${COLOR1}[V]${GRIS} para desactivar${RESET}"
         echo -ne "  ${I_ALIEN} : "; read -r i
         case $i in
             [xX])
@@ -680,6 +881,10 @@ navegar() {
             [eE]) expulsar_usb_seguro ;;
             [uU]) menu_usb_tools ;;
             [tT]) menu_temas ;;
+            [iI]) estadisticas_carpeta ;;
+            [oO]) xfce4-terminal --working-directory="$(pwd)" & ;;
+            [bB]) thunar "$(pwd)" & ;;
+            [vV]) toggle_vista ;;
             [rR])
                 echo -n "$r" | xclip -selection clipboard 2>/dev/null || echo -n "$r" | xclip 2>/dev/null
                 echo -e "  ${COLOR1}${I_CHECK} Ruta copiada:${RESET} ${GRIS2}$r${RESET}"; sleep 1 ;;
@@ -703,9 +908,13 @@ navegar() {
                 if [[ "$c" == "s" ]]; then cd ..; rm -rf "$r"; echo -e "  ${COLOR1}Eliminado.${RESET}"; sleep 1
                 else echo -e "  ${GRIS}Cancelado.${RESET}"; sleep 1; fi ;;
             *)
-                if [[ "$i" =~ ^[0-9]+$ ]] && [ "$i" -ge 10 ]; then
-                    local s="${ls_arr[$((i-10))]}"
-                    [ -d "$s" ] && cd "$s" || menu_archivo "$s"
+                if [[ "$i" =~ ^[0-9]+$ ]]; then
+                    if [ "$MODO_VISTA" == "arbol" ]; then
+                        navegar_arbol "$i"
+                    elif [ "$i" -ge 10 ]; then
+                        local s="${ls_arr[$((i-10))]}"
+                        [ -d "$s" ] && cd "$s" || menu_archivo "$s"
+                    fi
                 fi ;;
         esac
     done
@@ -721,9 +930,9 @@ chmod +x "$TARGET"
 
 if [ ! -f /usr/local/bin/go ] && [ ! -L /usr/local/bin/go ]; then
     ln -s "$TARGET" /usr/local/bin/go
-    echo -e "\033[38;5;46m[👽] BLEXS V57.6 INSTALADO. USA 'go' PARA ENTRAR.\033[0m"
+    echo -e "\033[38;5;46m[👽] BLEXS V57.7 INSTALADO. USA 'go' PARA ENTRAR.\033[0m"
 else
     rm -f /usr/local/bin/go
     ln -s "$TARGET" /usr/local/bin/go
-    echo -e "\033[38;5;46m[👽] COMANDO 'go' ACTUALIZADO A V57.6.\033[0m"
+    echo -e "\033[38;5;46m[👽] COMANDO 'go' ACTUALIZADO A V57.7.\033[0m"
 fi
