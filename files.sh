@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==========================================
-# INSTALADOR GESTOR BLEXS V57.6 - TEMAS
+# INSTALADOR GESTOR BLEXS V57.7 - TEMAS
 # ==========================================
 
 if [ "$EUID" -ne 0 ]; then 
@@ -11,7 +11,7 @@ fi
 
 echo -e "\033[38;5;46m[👽] Instalando BLEXS V57.7...\033[0m"
 
-PKGS="zip xclip python3-pip ntfs-3g exfat-fuse exfatprogs rsync parted gdisk rename qrencode git psmisc"
+PKGS="zip xclip python3-pip ntfs-3g exfat-fuse exfatprogs rsync parted gdisk rename qrencode git psmisc xdg-user-dirs"
 for pkg in $PKGS; do
     if ! dpkg -s $pkg >/dev/null 2>&1; then apt-get install -y $pkg > /dev/null 2>&1; fi
 done
@@ -50,9 +50,77 @@ TEMA_FILE="$HOME/.blexs_tema"
 
 if [ -n "$SUDO_USER" ]; then REAL_USER="$SUDO_USER"; HOME_DIR=$(getent passwd "$SUDO_USER" | cut -d: -f6)
 else REAL_USER=$(whoami); HOME_DIR="$HOME"; fi
-ESCRITORIO="$HOME_DIR/Desktop"; [ -d "$HOME_DIR/Escritorio" ] && ESCRITORIO="$HOME_DIR/Escritorio"
+
 HAS_SUDO=""; if [ "$(id -u)" != "0" ]; then HAS_SUDO="sudo"; fi
 TEMA_FILE="$HOME_DIR/.blexs_tema"
+
+# ================= DETECCIÓN INTELIGENTE DE ESCRITORIO =================
+detectar_escritorio() {
+    # Recopilar TODOS los candidatos posibles (no retornar temprano)
+    local candidatos=()
+
+    # 1. xdg-user-dir con el usuario REAL (no root)
+    local xdg=""
+    if [ -n "$SUDO_USER" ]; then
+        xdg=$(sudo -u "$SUDO_USER" xdg-user-dir DESKTOP 2>/dev/null)
+    else
+        xdg=$(xdg-user-dir DESKTOP 2>/dev/null)
+    fi
+    # Agregar xdg como candidato si apunta a HOME_DIR
+    if [ -n "$xdg" ] && [ -d "$xdg" ] && [[ "$xdg" == "$HOME_DIR"* ]]; then
+        candidatos+=("$xdg")
+    fi
+
+    # 2. Nombres conocidos en múltiples idiomas
+    local nombres=("Desktop" "Escritorio" "Bureau" "Schreibtisch" "Skrivbord" "Bureaublad" "桌面")
+    for n in "${nombres[@]}"; do
+        local c="$HOME_DIR/$n"
+        if [ -d "$c" ]; then
+            # Evitar duplicados con lo que ya tenemos
+            local ya=false
+            for ex in "${candidatos[@]}"; do [ "$ex" == "$c" ] && ya=true; done
+            $ya || candidatos+=("$c")
+        fi
+    done
+
+    # 3. Búsqueda dinámica por patrón (por si tiene un nombre raro)
+    while IFS= read -r found; do
+        [ -z "$found" ] && continue
+        local ya=false
+        for ex in "${candidatos[@]}"; do [ "$ex" == "$found" ] && ya=true; done
+        $ya || candidatos+=("$found")
+    done < <(find "$HOME_DIR" -maxdepth 1 -type d \
+        \( -iname "*desktop*" -o -iname "*escritorio*" -o -iname "*bureau*" \) 2>/dev/null)
+
+    # 4. Elegir la que tenga MÁS contenido (archivos + carpetas)
+    local mejor="" mejor_count=-1
+    for c in "${candidatos[@]}"; do
+        local count
+        count=$(ls -1A "$c" 2>/dev/null | wc -l)
+        if [ "$count" -gt "$mejor_count" ]; then
+            mejor_count=$count
+            mejor="$c"
+        fi
+    done
+
+    # Si encontramos alguna con contenido, usarla
+    if [ -n "$mejor" ] && [ "$mejor_count" -gt 0 ]; then
+        echo "$mejor"; return
+    fi
+
+    # Si todas están vacías, preferir la de xdg
+    if [ -n "$xdg" ] && [ -d "$xdg" ] && [[ "$xdg" == "$HOME_DIR"* ]]; then
+        echo "$xdg"; return
+    fi
+
+    # Si hay algún candidato, usar el primero
+    [ ${#candidatos[@]} -gt 0 ] && echo "${candidatos[0]}" && return
+
+    # Último recurso
+    echo "$HOME_DIR"
+}
+
+ESCRITORIO=$(detectar_escritorio)
 
 # ================= SISTEMA DE TEMAS =================
 
@@ -66,67 +134,67 @@ aplicar_tema() {
     local t="$1"
     case $t in
         matrix)
-            COLOR1='\033[38;5;46m'   # verde neón - marco/primario
-            COLOR2='\033[38;5;40m'   # verde medio - numeros
-            COLOR3='\033[38;5;34m'   # verde oscuro - bordes
-            COLOR4='\033[38;5;51m'   # cyan - acento
-            COLOR5='\033[38;5;22m'   # verde muy oscuro - sep
+            COLOR1='\033[38;5;46m'
+            COLOR2='\033[38;5;40m'
+            COLOR3='\033[38;5;34m'
+            COLOR4='\033[38;5;51m'
+            COLOR5='\033[38;5;22m'
             NOMBRE_TEMA="🟩 MATRIX"
             ;;
         purpura)
-            COLOR1='\033[38;5;135m'  # púrpura brillante
-            COLOR2='\033[38;5;99m'   # púrpura medio
-            COLOR3='\033[38;5;93m'   # púrpura oscuro
-            COLOR4='\033[38;5;213m'  # rosa/lila acento
-            COLOR5='\033[38;5;55m'   # púrpura muy oscuro
+            COLOR1='\033[38;5;135m'
+            COLOR2='\033[38;5;99m'
+            COLOR3='\033[38;5;93m'
+            COLOR4='\033[38;5;213m'
+            COLOR5='\033[38;5;55m'
             NOMBRE_TEMA="🟣 PÚRPURA"
             ;;
         rojo)
-            COLOR1='\033[38;5;196m'  # rojo brillante
-            COLOR2='\033[38;5;160m'  # rojo medio
-            COLOR3='\033[38;5;124m'  # rojo oscuro
-            COLOR4='\033[38;5;208m'  # naranja acento
-            COLOR5='\033[38;5;88m'   # rojo muy oscuro
+            COLOR1='\033[38;5;196m'
+            COLOR2='\033[38;5;160m'
+            COLOR3='\033[38;5;124m'
+            COLOR4='\033[38;5;208m'
+            COLOR5='\033[38;5;88m'
             NOMBRE_TEMA="🔴 ROJO"
             ;;
         azul)
-            COLOR1='\033[38;5;39m'   # azul brillante
-            COLOR2='\033[38;5;33m'   # azul medio
-            COLOR3='\033[38;5;27m'   # azul oscuro
-            COLOR4='\033[38;5;51m'   # cyan acento
-            COLOR5='\033[38;5;17m'   # azul muy oscuro
+            COLOR1='\033[38;5;39m'
+            COLOR2='\033[38;5;33m'
+            COLOR3='\033[38;5;27m'
+            COLOR4='\033[38;5;51m'
+            COLOR5='\033[38;5;17m'
             NOMBRE_TEMA="🔵 AZUL"
             ;;
         dorado)
-            COLOR1='\033[38;5;226m'  # amarillo brillante
-            COLOR2='\033[38;5;220m'  # dorado medio
-            COLOR3='\033[38;5;178m'  # dorado oscuro
-            COLOR4='\033[38;5;214m'  # naranja acento
-            COLOR5='\033[38;5;136m'  # dorado muy oscuro
+            COLOR1='\033[38;5;226m'
+            COLOR2='\033[38;5;220m'
+            COLOR3='\033[38;5;178m'
+            COLOR4='\033[38;5;214m'
+            COLOR5='\033[38;5;136m'
             NOMBRE_TEMA="🟡 DORADO"
             ;;
         cyan)
-            COLOR1='\033[38;5;51m'   # cyan brillante
-            COLOR2='\033[38;5;45m'   # cyan medio
-            COLOR3='\033[38;5;37m'   # cyan oscuro
-            COLOR4='\033[38;5;46m'   # verde acento
-            COLOR5='\033[38;5;23m'   # cyan muy oscuro
+            COLOR1='\033[38;5;51m'
+            COLOR2='\033[38;5;45m'
+            COLOR3='\033[38;5;37m'
+            COLOR4='\033[38;5;46m'
+            COLOR5='\033[38;5;23m'
             NOMBRE_TEMA="🩵 CYAN"
             ;;
         rosa)
-            COLOR1='\033[38;5;213m'  # rosa brillante
-            COLOR2='\033[38;5;205m'  # rosa medio
-            COLOR3='\033[38;5;162m'  # rosa oscuro
-            COLOR4='\033[38;5;51m'   # cyan acento
-            COLOR5='\033[38;5;89m'   # rosa muy oscuro
+            COLOR1='\033[38;5;213m'
+            COLOR2='\033[38;5;205m'
+            COLOR3='\033[38;5;162m'
+            COLOR4='\033[38;5;51m'
+            COLOR5='\033[38;5;89m'
             NOMBRE_TEMA="🩷 ROSA"
             ;;
         naranja)
-            COLOR1='\033[38;5;214m'  # naranja brillante
-            COLOR2='\033[38;5;208m'  # naranja medio
-            COLOR3='\033[38;5;166m'  # naranja oscuro
-            COLOR4='\033[38;5;226m'  # amarillo acento
-            COLOR5='\033[38;5;130m'  # naranja muy oscuro
+            COLOR1='\033[38;5;214m'
+            COLOR2='\033[38;5;208m'
+            COLOR3='\033[38;5;166m'
+            COLOR4='\033[38;5;226m'
+            COLOR5='\033[38;5;130m'
             NOMBRE_TEMA="🟠 NARANJA"
             ;;
         blanco)
@@ -146,51 +214,51 @@ aplicar_tema() {
             NOMBRE_TEMA="🧊 HIELO"
             ;;
         fuego)
-            COLOR1='\033[38;5;202m'  # naranja fuego
-            COLOR2='\033[38;5;214m'  # naranja brillante
-            COLOR3='\033[38;5;130m'  # marrón naranja
-            COLOR4='\033[38;5;220m'  # amarillo cálido
-            COLOR5='\033[38;5;94m'   # marrón oscuro
+            COLOR1='\033[38;5;202m'
+            COLOR2='\033[38;5;214m'
+            COLOR3='\033[38;5;130m'
+            COLOR4='\033[38;5;220m'
+            COLOR5='\033[38;5;94m'
             NOMBRE_TEMA="🔥 FUEGO"
             ;;
         oceano)
-            COLOR1='\033[38;5;117m'  # azul agua claro
-            COLOR2='\033[38;5;74m'   # azul agua medio
-            COLOR3='\033[38;5;67m'   # azul profundo
-            COLOR4='\033[38;5;159m'  # celeste acento
-            COLOR5='\033[38;5;24m'   # azul marino oscuro
+            COLOR1='\033[38;5;117m'
+            COLOR2='\033[38;5;74m'
+            COLOR3='\033[38;5;67m'
+            COLOR4='\033[38;5;159m'
+            COLOR5='\033[38;5;24m'
             NOMBRE_TEMA="🌊 OCÉANO"
             ;;
         toxic)
-            COLOR1='\033[38;5;190m'  # verde lima
-            COLOR2='\033[38;5;184m'  # amarillo verdoso
-            COLOR3='\033[38;5;142m'  # oliva oscuro
-            COLOR4='\033[38;5;226m'  # amarillo neón
-            COLOR5='\033[38;5;100m'  # verde oliva muy oscuro
+            COLOR1='\033[38;5;190m'
+            COLOR2='\033[38;5;184m'
+            COLOR3='\033[38;5;142m'
+            COLOR4='\033[38;5;226m'
+            COLOR5='\033[38;5;100m'
             NOMBRE_TEMA="☢️  TOXIC"
             ;;
         neon)
-            COLOR1='\033[38;5;201m'  # magenta neón
-            COLOR2='\033[38;5;198m'  # rosa fuerte
-            COLOR3='\033[38;5;162m'  # rosa oscuro
-            COLOR4='\033[38;5;123m'  # celeste acento
-            COLOR5='\033[38;5;89m'   # magenta muy oscuro
+            COLOR1='\033[38;5;201m'
+            COLOR2='\033[38;5;198m'
+            COLOR3='\033[38;5;162m'
+            COLOR4='\033[38;5;123m'
+            COLOR5='\033[38;5;89m'
             NOMBRE_TEMA="💜 NEÓN"
             ;;
         sangre)
-            COLOR1='\033[38;5;160m'  # rojo sangre
-            COLOR2='\033[38;5;124m'  # rojo oscuro
-            COLOR3='\033[38;5;88m'   # rojo muy oscuro
-            COLOR4='\033[38;5;203m'  # salmón acento
-            COLOR5='\033[38;5;52m'   # granate
+            COLOR1='\033[38;5;160m'
+            COLOR2='\033[38;5;124m'
+            COLOR3='\033[38;5;88m'
+            COLOR4='\033[38;5;203m'
+            COLOR5='\033[38;5;52m'
             NOMBRE_TEMA="🩸 SANGRE"
             ;;
         galaxia)
-            COLOR1='\033[38;5;183m'  # violeta claro
-            COLOR2='\033[38;5;141m'  # violeta medio
-            COLOR3='\033[38;5;97m'   # violeta oscuro
-            COLOR4='\033[38;5;219m'  # rosa lila acento
-            COLOR5='\033[38;5;54m'   # índigo oscuro
+            COLOR1='\033[38;5;183m'
+            COLOR2='\033[38;5;141m'
+            COLOR3='\033[38;5;97m'
+            COLOR4='\033[38;5;219m'
+            COLOR5='\033[38;5;54m'
             NOMBRE_TEMA="🌌 GALAXIA"
             ;;
         *)
@@ -317,7 +385,7 @@ toggle_vista() {
 }
 
 # --- MODO ÁRBOL INTERACTIVO ---
-ARBOL_MAPA=()  # indice global -> ruta completa
+ARBOL_MAPA=()
 
 _arbol_build() {
     local dir="${1:-.}"
@@ -359,7 +427,6 @@ navegar_arbol() {
     local sel="$1"
     if [[ "$sel" =~ ^[0-9]+$ ]] && [ "$sel" -lt "${#ARBOL_MAPA[@]}" ]; then
         local target="${ARBOL_MAPA[$sel]}"
-        # normalizar ruta: quitar el ./
         target="${target#./}"
         local full_path="$(pwd)/$target"
         if [ -d "$full_path" ]; then
@@ -536,7 +603,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         path = urllib.parse.unquote(self.path.split('?')[0])
 
-        # --- ZIP toda la carpeta ---
         if path == '/zipall':
             buf = io.BytesIO()
             with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as zf:
@@ -555,7 +621,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(data)
             return
 
-        # --- Descarga forzada de archivo ---
         if path.startswith('/dl/'):
             rel = path[4:]
             fp = os.path.join(BASE_DIR, rel)
@@ -575,7 +640,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.send_error(404)
             return
 
-        # --- Página principal ---
         if path == '/' or path == '/subir':
             entries = sorted(os.scandir(BASE_DIR), key=lambda e: (not e.is_dir(), e.name.lower()))
             rows = ''
@@ -660,7 +724,7 @@ PY_EOF
         echo -e "\n  ${ROJO}❌ Servidor cerrado inesperadamente.${RESET}"
         read -p "  Enter para continuar..."
     fi
-    rm /tmp/blexs_airdrop.py
+    rm -f /tmp/blexs_airdrop.py
 }
 
 actualizar_git() {
@@ -823,7 +887,7 @@ navegar() {
         info_panel
         [ -n "$CLIP_USB_SRC" ] && echo -e "${COLOR3}║${RESET}  ${I_POWER} ${BOLD}${COLOR1}USB:${RESET} ${AMARILLO}$(basename "$CLIP_USB_SRC")${RESET}"
         echo -e "${COLOR3}╠══════════════════════════════════════════════════════════════╣${RESET}"
-        echo -e "${COLOR3}║${RESET}  ${ROJO}[x]${RESET} ${I_EXIT} Salir     ${GRIS}[0]${RESET} ${I_BACK} Atrás     ${COLOR4}[1]${RESET} ${I_HOME} Escritorio"
+        echo -e "${COLOR3}║${RESET}  ${ROJO}[x]${RESET} ${I_EXIT} Salir     ${GRIS}[0]${RESET} ${I_BACK} Atrás     ${COLOR4}[1]${RESET} ${I_HOME} Escritorio ${GRIS2}($(basename "$ESCRITORIO"))${RESET}"
         echo -e "${COLOR3}║${RESET}  ${COLOR1}[2]${RESET} ${I_PLUS_DIR} Crear Dir  ${COLOR2}[3]${RESET} ${I_PLUS_FILE} Crear File  ${AMARILLO}[U]${RESET} ${I_USB} USB Tools"
         echo -e "${COLOR3}║${RESET}  ${COLOR4}[6]${RESET} ${I_COPY} Copiar Dir  ${COLOR4}[7]${RESET} ${I_MOVE} Mover Dir  ${ROJO}[9]${RESET} ${I_TRASH} Borrar"
         echo -e "${COLOR3}║${RESET}  ${COLOR2}[E]${RESET} ${I_EJECT} Expulsar   ${COLOR1}[W]${RESET} ${I_WEB} Airdrop   ${AMARILLO}[/]${RESET} ${I_SEARCH} Buscar"
