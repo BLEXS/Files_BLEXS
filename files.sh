@@ -785,18 +785,28 @@ menu_archivo() {
                 sep_top
                 echo -e "${COLOR3}║${RESET}  ${I_RUN} ${BOLD}${COLOR1}EJECUTAR:${RESET} ${AMARILLO}$n${COLOR3}                                          ║${RESET}"
                 sep_bot
-                echo -e "\n  ${I_SUDO}  ${ROJO}[1]${RESET} Con sudo"
-                echo -e "  ${I_NOSUDO} ${COLOR1}[2]${RESET} Sin sudo"
+                echo -e "\n  ${I_SUDO}  ${ROJO}[1]${RESET} Como ROOT (sudo)"
+                echo -e "  ${I_NOSUDO} ${COLOR1}[2]${RESET} Como $REAL_USER"
                 echo -e "  ${GRIS}     [0]${RESET} Cancelar"
                 echo -ne "\n  ${I_ALIEN} : "; read -r modo_exec
                 case $modo_exec in
                     1|2)
                         clear
                         echo -e "${COLOR1}═══ EJECUTANDO: $n ═══${RESET}\n"
-                        if [[ "$n" == *.py ]]; then
-                            [ "$modo_exec" == "1" ] && sudo python3 "$f" || python3 "$f"
+                        if [ "$modo_exec" == "1" ]; then
+                            # Ejecutar como root con sudo para que $SUDO_USER se propague
+                            if [[ "$n" == *.py ]]; then
+                                sudo -E python3 "$f"
+                            else
+                                sudo -E bash "$f"
+                            fi
                         else
-                            [ "$modo_exec" == "1" ] && sudo bash "$f" || bash "$f"
+                            # Ejecutar como usuario normal
+                            if [[ "$n" == *.py ]]; then
+                                sudo -u "$REAL_USER" python3 "$f"
+                            else
+                                sudo -u "$REAL_USER" bash "$f"
+                            fi
                         fi
                         echo -e "\n${COLOR1}═══ FIN ═══${RESET}"
                         echo -ne "  Enter para volver..."; read
